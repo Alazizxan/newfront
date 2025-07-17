@@ -36,7 +36,7 @@ export default function TaskPage() {
 
   useEffect(() => {
     const lines = code.split('\n');
-    const lineCount = Math.max(lines.length, 15);
+    const lineCount = Math.max(lines.length, 20);
     setLineNumbers(Array.from({ length: lineCount }, (_, i) => i + 1));
     
     const lastLine = lines.length;
@@ -71,7 +71,7 @@ export default function TaskPage() {
       setSubmitted(true);
     } catch (error) {
       console.error("Error submitting code:", error);
-      setFeedback("❌ Error submitting code");
+      setFeedback("❌ Error submitting code. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -84,12 +84,12 @@ export default function TaskPage() {
   };
 
   if (!task) return (
-    <div className="min-h-screen bg-[#0a0a0f] text-zinc-100 p-4 flex items-center justify-center">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] p-4 flex items-center justify-center">
       <div className="text-center">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-[#1a1a2e] border border-cyan-500/30 flex items-center justify-center pulse-neon">
-          <div className="w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full spinner-neon"></div>
+        <div className="w-20 h-20 mx-auto mb-6 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-primary)] flex items-center justify-center pulse-glow">
+          <div className="w-10 h-10 border-2 border-[var(--accent-primary)] border-t-transparent rounded-full spinner"></div>
         </div>
-        <p className="font-mono text-zinc-400">Loading task...</p>
+        <p className="font-mono text-[var(--text-secondary)]">Loading task...</p>
       </div>
     </div>
   );
@@ -98,74 +98,85 @@ export default function TaskPage() {
   const hasNextTask = nextTaskIndex < course.tasks.length;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-zinc-100 p-4">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
+      <div className="container-responsive py-6">
         {/* Header */}
-        <div className="mb-6 p-6 rounded-2xl bg-[#1a1a2e]/80 backdrop-blur-xl border border-cyan-500/20 shadow-lg">
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <h1 className="text-2xl font-mono font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                {task.title}
-              </h1>
-              <p className="text-zinc-400 font-mono text-sm mt-1">
-                {course.title} • Task {Number(params.taskIndex) + 1}
-              </p>
+        <div className="card p-6 lg:p-8 mb-8 dark-theme-shadow-lg">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div className="flex items-center gap-4 lg:gap-6">
+              <div className="w-14 h-14 lg:w-16 lg:h-16 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-secondary)] flex items-center justify-center hover-glow transition-all duration-300">
+                <span className="text-2xl lg:text-3xl">🎯</span>
+              </div>
+              
+              <div>
+                <h1 className="text-2xl lg:text-3xl font-mono font-bold text-gradient mb-2">
+                  {task.title}
+                </h1>
+                <div className="flex items-center gap-4 text-sm font-mono text-[var(--text-secondary)]">
+                  <span>{course.title}</span>
+                  <div className="w-1 h-1 rounded-full bg-[var(--text-muted)]"></div>
+                  <span>Task {Number(params.taskIndex) + 1}</span>
+                </div>
+              </div>
             </div>
+            
             <button
               onClick={() => router.push(`/course/${params.id}`)}
-              className="px-4 py-2 bg-[#16213e] border border-zinc-600/30 hover:border-zinc-500 text-zinc-300 hover:text-white rounded-lg font-mono text-sm transition-all duration-200"
+              className="btn-secondary px-6 py-3 rounded-lg font-mono text-sm hover-lift flex items-center gap-2"
             >
-              ← Back
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Back to Course
             </button>
           </div>
 
-          <div className="p-4 bg-[#16213e]/60 border border-blue-400/20 rounded-lg">
-            <h2 className="text-lg font-mono font-semibold mb-2 text-blue-400">Task Description:</h2>
-            <p className="text-zinc-300 font-mono leading-relaxed">{task.description}</p>
+          <div className="mt-6 p-6 bg-[var(--bg-tertiary)] border border-[var(--accent-primary)]/20 rounded-lg">
+            <h2 className="text-lg font-mono font-semibold mb-4 text-[var(--accent-primary)] flex items-center gap-2">
+              <span>📋</span>
+              Task Description
+            </h2>
+            <p className="text-[var(--text-primary)] font-mono leading-relaxed">{task.description}</p>
           </div>
         </div>
 
         {/* Code Editor */}
-        <div className="mb-6 rounded-2xl overflow-hidden border border-cyan-500/20 shadow-lg">
-          <div className="bg-[#1a1a2e] px-6 py-3 border-b border-cyan-500/20 flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="flex gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                <div className="w-3 h-3 rounded-full bg-green-400"></div>
+        <div className="code-editor mb-8">
+          <div className="code-editor-header">
+            <div className="flex items-center gap-4">
+              <div className="code-editor-dots">
+                <div className="code-editor-dot bg-[var(--error)]"></div>
+                <div className="code-editor-dot bg-[var(--warning)]"></div>
+                <div className="code-editor-dot bg-[var(--success)]"></div>
               </div>
-              <span className="text-zinc-400 font-mono text-sm">solution.js</span>
+              <span className="text-[var(--text-secondary)] font-mono text-sm">solution.js</span>
             </div>
-            <div className="text-xs text-zinc-500 font-mono">
-              Line: {cursorPosition.line}, Col: {cursorPosition.column}
+            <div className="text-xs text-[var(--text-muted)] font-mono">
+              Line: {cursorPosition.line}, Column: {cursorPosition.column}
             </div>
           </div>
           
-          <div className="flex bg-[#0f0f1a]">
-            {/* Line Numbers */}
-            <div className="w-12 bg-[#1a1a2e] text-right pr-3 py-4 text-zinc-500 text-sm font-mono select-none border-r border-cyan-500/10">
+          <div className="code-editor-content">
+            <div className="code-line-numbers">
               {lineNumbers.map((num) => (
                 <div 
                   key={num} 
-                  className={`leading-6 ${num === cursorPosition.line ? 'text-cyan-400 bg-cyan-400/10' : ''}`}
+                  className={`transition-colors duration-200 ${
+                    num === cursorPosition.line ? 'text-[var(--accent-primary)] bg-[var(--accent-primary)]/10' : ''
+                  }`}
                 >
                   {num}
                 </div>
               ))}
             </div>
             
-            {/* Code Area */}
             <textarea
               value={code}
               onChange={(e) => setCode(e.target.value)}
-              placeholder={`// Write your solution here\n\nfunction solution() {\n  // Your code goes here\n  \n}`}
-              className={`flex-1 bg-[#0f0f1a] text-zinc-300 p-4 font-mono text-sm focus:outline-none resize-none h-80 leading-6 ${submitted ? 'opacity-70 cursor-not-allowed' : ''}`}
+              placeholder={`// Write your solution here\n// Example:\n\nfunction solution() {\n  // Your code goes here\n  \n  return result;\n}`}
+              className={`code-textarea ${submitted ? 'opacity-70 cursor-not-allowed' : ''}`}
               disabled={submitted}
               spellCheck={false}
-              style={{
-                caretColor: '#00d4ff',
-                tabSize: 2
-              }}
             />
           </div>
         </div>
@@ -174,18 +185,18 @@ export default function TaskPage() {
         {!submitted && (
           <button
             onClick={handleSubmit}
-            disabled={loading}
-            className="btn-primary w-full py-4 mb-6 rounded-xl font-mono font-bold text-white transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            disabled={loading || !code.trim()}
+            className="btn-primary w-full py-4 mb-8 rounded-lg font-mono font-bold text-white transition-all duration-300 dark-theme-shadow hover-lift disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
           >
             {loading ? (
               <>
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full spinner-neon mr-2"></div>
-                Running tests...
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full spinner"></div>
+                <span>Running tests...</span>
               </>
             ) : (
               <>
-                <span className="mr-2">🚀</span>
-                Submit Solution
+                <span className="text-lg">🚀</span>
+                <span>Submit Solution</span>
               </>
             )}
           </button>
@@ -193,55 +204,81 @@ export default function TaskPage() {
 
         {/* Results */}
         {feedback && (
-          <div className={`rounded-2xl overflow-hidden mb-6 border ${feedback.includes("✅") ? 'border-emerald-500/30' : 'border-red-500/30'} shadow-lg`}>
-            <div className={`px-6 py-4 ${feedback.includes("✅") ? 'bg-emerald-500/10' : 'bg-red-500/10'} flex items-center`}>
-              {feedback.includes("✅") ? (
-                <>
-                  <div className="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center mr-3">
-                    <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                  </div>
-                  <span className="font-mono font-bold text-emerald-400">Success!</span>
-                </>
-              ) : (
-                <>
-                  <div className="w-6 h-6 rounded-full bg-red-500/20 border border-red-500/40 flex items-center justify-center mr-3">
-                    <svg className="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                  </div>
-                  <span className="font-mono font-bold text-red-400">Test Failed</span>
-                </>
-              )}
+          <div className={`card mb-8 overflow-hidden ${
+            feedback.includes("✅") 
+              ? 'border-[var(--success)]/30 bg-gradient-to-br from-[var(--success)]/5 to-transparent' 
+              : 'border-[var(--error)]/30 bg-gradient-to-br from-[var(--error)]/5 to-transparent'
+          }`}>
+            <div className={`px-6 py-4 border-b ${
+              feedback.includes("✅") 
+                ? 'bg-[var(--success)]/10 border-[var(--success)]/20' 
+                : 'bg-[var(--error)]/10 border-[var(--error)]/20'
+            } flex items-center gap-4`}>
+              <div className={`w-12 h-12 rounded-lg border flex items-center justify-center ${
+                feedback.includes("✅")
+                  ? 'bg-[var(--success)]/20 border-[var(--success)]/40'
+                  : 'bg-[var(--error)]/20 border-[var(--error)]/40'
+              }`}>
+                {feedback.includes("✅") ? (
+                  <svg className="w-6 h-6 text-[var(--success)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                ) : (
+                  <svg className="w-6 h-6 text-[var(--error)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                )}
+              </div>
+              
+              <div>
+                <h3 className={`font-mono font-bold text-lg ${
+                  feedback.includes("✅") ? 'text-[var(--success)]' : 'text-[var(--error)]'
+                }`}>
+                  {feedback.includes("✅") ? 'Success!' : 'Test Failed'}
+                </h3>
+                <p className="text-[var(--text-secondary)] font-mono text-sm">
+                  {feedback.includes("✅") ? 'All tests passed successfully' : 'Some tests did not pass'}
+                </p>
+              </div>
             </div>
             
-            <div className="bg-[#1a1a2e]/80 p-6">
-              <pre className="whitespace-pre-wrap text-sm font-mono text-zinc-300 leading-relaxed">{feedback}</pre>
+            <div className="p-6">
+              <pre className="whitespace-pre-wrap text-sm font-mono text-[var(--text-primary)] leading-relaxed bg-[var(--bg-primary)] p-4 rounded-lg border border-[var(--border-primary)]">
+                {feedback}
+              </pre>
               
-              <div className="flex flex-wrap gap-3 mt-6">
+              <div className="flex flex-wrap gap-4 mt-6">
                 <button
                   onClick={() => router.push(`/course/${params.id}`)}
-                  className="px-4 py-2 text-sm rounded-lg border border-zinc-600/30 hover:border-zinc-500 text-zinc-300 hover:text-white font-mono transition-all duration-200"
+                  className="btn-secondary px-4 py-2 rounded-lg font-mono text-sm hover-lift flex items-center gap-2"
                 >
-                  ← Back to Course
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                  Back to Course
                 </button>
                 
                 {!feedback.includes("✅") && (
                   <button
                     onClick={handleRetry}
-                    className="px-4 py-2 text-sm rounded-lg border border-yellow-500/30 hover:border-yellow-400 text-yellow-300 hover:text-yellow-200 font-mono transition-all duration-200"
+                    className="btn-ghost px-4 py-2 rounded-lg font-mono text-sm hover-lift flex items-center gap-2"
                   >
-                    🔄 Try Again
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Try Again
                   </button>
                 )}
                 
                 {hasNextTask && feedback.includes("✅") && (
                   <button
                     onClick={() => router.push(`/course/${params.id}/task/${nextTaskIndex}`)}
-                    className="px-4 py-2 text-sm rounded-lg border border-emerald-500/30 hover:border-emerald-400 text-emerald-300 hover:text-emerald-200 font-mono transition-all duration-200"
+                    className="btn-primary px-4 py-2 rounded-lg font-mono text-sm hover-lift flex items-center gap-2"
                   >
-                    Next Task →
+                    <span>Next Task</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
                   </button>
                 )}
               </div>
